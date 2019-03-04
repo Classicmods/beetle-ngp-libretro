@@ -1,5 +1,6 @@
 DEBUG = 0
 FRONTEND_SUPPORTS_RGB565 = 1
+LOAD_FROM_MEMORY = 1
 
 CORE_DIR := .
 
@@ -226,6 +227,7 @@ else ifeq ($(platform), ctr)
    FLAGS += -fno-rtti
    FLAGS += -fno-exceptions -DDISABLE_EXCEPTIONS
    STATIC_LINKING = 1
+   LOAD_FROM_MEMORY = 0
 
 # Xbox 360
 else ifeq ($(platform), xenon)
@@ -526,6 +528,10 @@ ifeq ($(NO_GCC),1)
    WARNINGS :=
 endif
 
+ifeq ($(LOAD_FROM_MEMORY),1)
+   FLAGS := -DLOAD_FROM_MEMORY
+endif
+
 ifeq ($(DEBUG), 1)
 ifneq (,$(findstring msvc,$(platform)))
 	ifeq ($(STATIC_LINKING),1)
@@ -597,7 +603,7 @@ else
 endif
 
 $(TARGET): $(OBJECTS)
-	@echo "** BUILDING $(TARGET) FOR PLATFORM $(platform) **"
+
 ifeq ($(platform), emscripten)
 	$(CXX) $(CXXFLAGS) $(OBJOUT)$@ $^
 else ifeq ($(STATIC_LINKING), 1)
@@ -605,7 +611,6 @@ else ifeq ($(STATIC_LINKING), 1)
 else
 	$(LD) $(LINKOUT)$@ $^ $(LDFLAGS) $(LIBS)
 endif
-	@echo "** BUILD SUCCESSFUL! GG NO RE **"
 
 %.o: %.cpp
 	$(CXX) -c $(OBJOUT)$@ $< $(CPPFLAGS) $(CXXFLAGS)
